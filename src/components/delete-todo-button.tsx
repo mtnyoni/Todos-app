@@ -5,9 +5,13 @@ import { useRef, useState } from "react"
 import { toast } from "sonner"
 import type z from "zod"
 
+const HOLDING_THRESHOLD = 600
+
 export function DeleteTodoButton({ todoId }: { todoId: string }) {
-	const [holding, setHolding] = useState(false)
-	const timerId = useRef<number | null>(null)
+	const [progress, setProgress] = useState(0)
+
+	const requestRef = useRef<number | null>(null)
+	const startTimeRef = useRef<number | null>(null)
 
 	const queryClient = useQueryClient()
 
@@ -43,20 +47,35 @@ export function DeleteTodoButton({ todoId }: { todoId: string }) {
 		},
 	})
 
-	const handleMouseDown = () => {
-		setHolding(true)
-		timerId.current = window.setTimeout(() => {
+	const step = (timestamp: number) => {
+		if (!startTimeRef.current) startTimeRef.current = timestamp
+		const elapsed = timestamp - startTimeRef.current
+		const newProgress = Math.min(elapsed / HOLDING_THRESHOLD, 1)
+		setProgress(newProgress)
+
+		if (elapsed >= HOLDING_THRESHOLD) {
 			mutation.mutate(todoId)
-			setHolding(false)
-		}, 1000)
+			cancelAnimationFrame(requestRef.current!)
+			requestRef.current = null
+			setProgress(0)
+			return
+		}
+
+		requestRef.current = requestAnimationFrame(step)
+	}
+
+	const handleMouseDown = () => {
+		startTimeRef.current = null
+		setProgress(0)
+		requestRef.current = requestAnimationFrame(step)
 	}
 
 	const handleMouseUp = () => {
-		setHolding(false)
-		if (timerId.current) {
-			clearTimeout(timerId.current)
-			timerId.current = null
+		if (requestRef.current) {
+			cancelAnimationFrame(requestRef.current)
+			requestRef.current = null
 		}
+		setProgress(0)
 	}
 
 	return (
@@ -69,8 +88,14 @@ export function DeleteTodoButton({ todoId }: { todoId: string }) {
 			onMouseLeave={handleMouseUp}
 			onClick={(e) => e.stopPropagation()}
 			disabled={mutation.isPending}
-			className="ml-auto inline-flex h-7 cursor-pointer items-center gap-1 rounded-xl bg-red-100 px-3 py-1 text-sm font-medium text-red-400 disabled:opacity-50"
+			className="relative isolate ml-auto inline-flex h-7 cursor-pointer items-center gap-1 overflow-hidden rounded-xl bg-red-100 px-3 py-1 text-sm font-medium text-red-400 disabled:opacity-50"
 		>
+			<div
+				className="absolute inset-0 -z-1 rounded-[inherit] bg-red-300"
+				style={{
+					width: `${progress * 100}%`,
+				}}
+			/>
 			{mutation.isPending ? (
 				<Loader2Icon className="size-3 animate-spin" />
 			) : (
