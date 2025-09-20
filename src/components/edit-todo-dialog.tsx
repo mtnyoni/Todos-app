@@ -4,14 +4,19 @@ import { formatDate } from "date-fns"
 import { LoaderIcon } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { Checkbox, Dialog } from "radix-ui"
+import { useState } from "react"
 import type z from "zod"
 import { updateTodo, updateTodoSchema, type todoSchema } from "../api/routes"
+import { EditTodoDeleteButton } from "./edit-todo-delete-button"
 
 export function EditTodoDialog({
 	todo,
+	children,
 }: {
 	readonly todo: z.infer<typeof todoSchema>
+	readonly children: React.ReactNode
 }) {
+	const [open, setOpen] = useState(false)
 	const queryClient = useQueryClient()
 	const mutation = useMutation({
 		mutationFn: async (data: z.infer<typeof updateTodoSchema>) =>
@@ -32,8 +37,8 @@ export function EditTodoDialog({
 	})
 
 	return (
-		<Dialog.Root>
-			<Dialog.Trigger>Edit</Dialog.Trigger>
+		<Dialog.Root open={open} onOpenChange={setOpen}>
+			<Dialog.Trigger asChild>{children}</Dialog.Trigger>
 			<Dialog.Portal>
 				<Dialog.Overlay className="data-[state=open]:animate-overlayShow fixed inset-0 bg-black/50" />
 				<Dialog.Content className="fixed top-1/2 right-1 h-[calc(100vh-0.5rem)] w-[90vw] max-w-[500px] -translate-y-1/2 rounded-3xl border bg-background shadow-lg focus:outline-none">
@@ -43,10 +48,14 @@ export function EditTodoDialog({
 							form.handleSubmit()
 						}}
 					>
-						<div className="space-y-6 p-6">
-							<div>
+						<div className="space-x-2 border-b px-6 py-6">
+							Created on
+							<span>
+								{" "}
 								{formatDate(todo.createdAt, "dd MMM, yyyy")}
-							</div>
+							</span>
+						</div>
+						<div className="space-y-12 px-6 pt-5">
 							<Dialog.Title>
 								<form.Field name="task">
 									{(field) => (
@@ -56,7 +65,7 @@ export function EditTodoDialog({
 											onChange={(e) =>
 												field.setValue(e.target.value)
 											}
-											className="h-16 w-full border-b text-lg"
+											className="h-16 w-full border-b p-3 text-xl font-semibold outline-none focus-visible:border-primary"
 										/>
 									)}
 								</form.Field>
@@ -65,13 +74,13 @@ export function EditTodoDialog({
 								<form.Field name="description">
 									{(field) => (
 										<textarea
-											rows={5}
+											rows={2}
 											placeholder="Description"
 											value={field.state.value}
 											onChange={(e) =>
 												field.setValue(e.target.value)
 											}
-											className="w-full border-b"
+											className="w-full border-b p-3 outline-none focus-visible:border-primary"
 										/>
 									)}
 								</form.Field>
@@ -139,7 +148,8 @@ export function EditTodoDialog({
 								>
 									<button
 										type="reset"
-										className="inline-flex items-center rounded-lg bg-muted px-10 py-2 text-sm font-medium text-muted-foreground"
+										onClick={() => form.reset()}
+										className="inline-flex cursor-pointer items-center rounded-lg bg-muted px-10 py-2 text-sm font-medium text-muted-foreground hover:bg-gray-200"
 									>
 										Reset
 									</button>
@@ -152,12 +162,13 @@ export function EditTodoDialog({
 										)}
 										Save
 									</button>
-									<button
-										type="button"
-										className="inline-flex items-center rounded-lg bg-red-200 px-10 py-2 text-sm font-medium text-red-800"
-									>
-										Delete
-									</button>
+									<EditTodoDeleteButton
+										id={todo.id}
+										cleanUpForm={() => {
+											form.reset()
+											setOpen(false)
+										}}
+									/>
 								</fieldset>
 							)}
 						</form.Subscribe>

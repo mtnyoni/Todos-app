@@ -8,7 +8,8 @@ import type z from "zod"
 
 export function AddTodoDialog() {
 	const queryClient = useQueryClient()
-	const mutation = useMutation({
+
+	const addTodoMutation = useMutation({
 		mutationFn: async (data: z.infer<typeof addTodoSchema>) =>
 			addTodo({
 				task: data.task,
@@ -28,7 +29,7 @@ export function AddTodoDialog() {
 			isCompleted: false,
 			description: "",
 		},
-		onSubmit: async (data) => mutation.mutateAsync(data.value),
+		onSubmit: async (data) => addTodoMutation.mutateAsync(data.value),
 	})
 
 	return (
@@ -48,7 +49,7 @@ export function AddTodoDialog() {
 							form.handleSubmit()
 						}}
 					>
-						<div className="space-y-6 p-6">
+						<div className="space-y-20 p-6">
 							<Dialog.Title>
 								<form.Field name="task">
 									{(field) => (
@@ -58,7 +59,7 @@ export function AddTodoDialog() {
 											onChange={(e) =>
 												field.setValue(e.target.value)
 											}
-											className="h-16 w-full border-b text-lg"
+											className="h-16 w-full border-b p-3 text-xl font-semibold outline-none focus-visible:border-primary"
 										/>
 									)}
 								</form.Field>
@@ -67,13 +68,13 @@ export function AddTodoDialog() {
 								<form.Field name="description">
 									{(field) => (
 										<textarea
-											rows={5}
+											rows={2}
 											placeholder="Description"
 											value={field.state.value}
 											onChange={(e) =>
 												field.setValue(e.target.value)
 											}
-											className="w-full border-b"
+											className="w-full border-b p-3 outline-none focus-visible:border-primary"
 										/>
 									)}
 								</form.Field>
@@ -88,7 +89,8 @@ export function AddTodoDialog() {
 								>
 									<button
 										type="reset"
-										className="inline-flex items-center rounded-lg bg-muted px-10 py-2 text-sm font-medium text-muted-foreground"
+										onClick={() => form.reset()}
+										className="inline-flex cursor-pointer items-center rounded-lg bg-muted px-10 py-2 text-sm font-medium text-muted-foreground hover:bg-gray-200"
 									>
 										Reset
 									</button>
