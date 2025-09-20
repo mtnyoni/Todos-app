@@ -8,12 +8,6 @@ export const todoSchema = z.object({
 	createdAt: z.date(),
 })
 
-export const updateTodoSchema = z.object({
-	task: z.string().min(2).max(100),
-	description: z.string().min(2).max(100),
-	isCompleted: z.boolean(),
-})
-
 let todos: z.infer<typeof todoSchema>[] = [
 	{
 		id: "1",
@@ -44,12 +38,30 @@ export const createID = (): UUID => {
 	return crypto.randomUUID()
 }
 
-export async function getAll() {
+export async function getTodos(search?: string) {
 	await new Promise((resolve) => setTimeout(resolve, 2_000))
+	if (search?.trim()) {
+		return todos.filter((todo) =>
+			todo.task.toLowerCase().includes(search.toLowerCase())
+		)
+	}
+
 	return todos
 }
 
-export async function addTodo(task: string, description: string) {
+export const addTodoSchema = todoSchema.omit({
+	id: true,
+	createdAt: true,
+	isCompleted: true,
+})
+
+export async function addTodo(newTodoData: z.infer<typeof addTodoSchema>) {
+	const parsed = addTodoSchema.safeParse(newTodoData)
+	if (!parsed.success) {
+		throw new Error("Task and description are required")
+	}
+
+	const { task, description } = parsed.data
 	const newTodo = {
 		id: createID(),
 		task,
@@ -58,10 +70,16 @@ export async function addTodo(task: string, description: string) {
 		createdAt: new Date(),
 	}
 
-	todos = [...todos, newTodo]
+	todos = [newTodo, ...todos]
 	await new Promise((resolve) => setTimeout(resolve, 2_000))
 	return todos.find((todo) => todo.id === newTodo.id)!
 }
+
+export const updateTodoSchema = z.object({
+	task: z.string().min(2).max(100),
+	description: z.string().min(2).max(100),
+	isCompleted: z.boolean(),
+})
 
 export async function updateTodo(
 	id: string,

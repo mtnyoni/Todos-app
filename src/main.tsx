@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { NuqsAdapter } from "nuqs/adapters/react"
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { TodoList } from "./components/todo-list.tsx"
@@ -10,7 +11,9 @@ const queryClient = new QueryClient()
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
 		<QueryClientProvider client={queryClient}>
-			<TodoList />
+			<NuqsAdapter>
+				<TodoList />
+			</NuqsAdapter>
 			<Toaster />
 		</QueryClientProvider>
 	</StrictMode>

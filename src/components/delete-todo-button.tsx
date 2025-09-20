@@ -1,8 +1,8 @@
+import { deleteTodo, todoSchema } from "@/api/routes"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { TrashIcon } from "lucide-react"
 import { toast } from "sonner"
 import type z from "zod"
-import { deleteTodo, todoSchema } from "../api/routes"
 
 export function DeleteTodoButton({ todoId }: { todoId: string }) {
 	const queryClient = useQueryClient()

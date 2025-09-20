@@ -4,19 +4,14 @@ import { useState } from "react"
 import type z from "zod"
 import type { todoSchema } from "../api/routes"
 import { DeleteTodoButton } from "./delete-todo-button"
+import { EditTodoDialog } from "./edit-todo-dialog"
 
 export function TodoItem({ todo }: { todo: z.infer<typeof todoSchema> }) {
 	const [checked, setChecked] = useState(todo.isCompleted)
 
 	return (
-		<AnimatePresence initial={false}>
-			<motion.li
-				initial={{ height: 0 }}
-				animate={{ height: "auto" }}
-				exit={{ height: 0, y: -40, zIndex: -1 }}
-				transition={{ duration: 2_000 }}
-				className="flex items-center gap-8 overflow-hidden border-b px-4 py-4"
-			>
+		<AnimatePresence>
+			<motion.li className="flex items-center gap-8 overflow-hidden border-b px-4 py-4">
 				<Checkbox.Root
 					data-slot="checkbox"
 					checked={checked}
@@ -43,7 +38,11 @@ export function TodoItem({ todo }: { todo: z.infer<typeof todoSchema> }) {
 								initial={{ pathLength: 0 }}
 								animate={{
 									pathLength: 1,
-									transition: { duration: 0.3, delay: 0.1 },
+									transition: {
+										duration: 0.3,
+										delay: 0.1,
+										ease: "easeInOut",
+									},
 								}}
 								d="M4 12l5 5L20 6"
 							/>
@@ -57,6 +56,7 @@ export function TodoItem({ todo }: { todo: z.infer<typeof todoSchema> }) {
 					</p>
 				</div>
 				<DeleteTodoButton todoId={todo.id} />
+				<EditTodoDialog todo={todo} />
 			</motion.li>
 		</AnimatePresence>
 	)
