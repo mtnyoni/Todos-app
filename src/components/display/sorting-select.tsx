@@ -1,5 +1,10 @@
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react"
-import { Select } from "radix-ui"
+import * as Select from "@radix-ui/react-select"
+import {
+	CheckIcon,
+	ChevronDownIcon,
+	ChevronUpIcon,
+	SortDescIcon,
+} from "lucide-react"
 import { useState } from "react"
 
 export function SortingSelect() {
@@ -19,25 +24,43 @@ export function SortingSelect() {
 			</Select.Trigger>
 
 			<Select.Portal>
-				<Select.Content>
+				<Select.Content
+					position="popper"
+					sideOffset={4}
+					className="rounded-xl border bg-background p-3 sm:w-52"
+				>
 					<Select.Viewport>
-						<Select.Item value="testing">
-							<Select.ItemText />
-							<Select.ItemIndicator />
+						<Select.Item
+							value="Completions"
+							className="flex h-8 cursor-pointer items-center justify-between rounded px-2 select-none hover:bg-muted"
+						>
+							<Select.ItemText>
+								<div className="flex items-center gap-2">
+									<SortDescIcon className="size-3.5" />
+									Completions
+								</div>
+							</Select.ItemText>
+
+							<Select.ItemIndicator>
+								<CheckIcon className="size-3.5" />
+							</Select.ItemIndicator>
 						</Select.Item>
 
-						<Select.Group>
-							<Select.Label />
-							<Select.Item value="value">
-								<Select.ItemText />
-								<Select.ItemIndicator />
-							</Select.Item>
-						</Select.Group>
-
-						<Select.Separator />
+						<Select.Item
+							value="DateCreated"
+							className="flex h-8 cursor-pointer items-center justify-between rounded px-2 select-none hover:bg-muted"
+						>
+							<Select.ItemText>
+								<div className="flex items-center gap-2">
+									<SortDescIcon className="size-3.5" />
+									<span>Date created</span>
+								</div>
+							</Select.ItemText>
+							<Select.ItemIndicator>
+								<CheckIcon className="size-3.5" />
+							</Select.ItemIndicator>
+						</Select.Item>
 					</Select.Viewport>
-
-					<Select.Arrow />
 				</Select.Content>
 			</Select.Portal>
 		</Select.Root>

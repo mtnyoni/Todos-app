@@ -108,11 +108,13 @@ export async function updateTodo(
 }
 
 export async function deleteTodo(id: string) {
-	const todo = todos.find((todo) => todo.id === id)
-	if (!todo) {
+	const todoIndex = todos.findIndex((todo) => todo.id === id)
+	if (todoIndex === -1) {
 		throw new Error("Todo not found")
 	}
 
-	todos = todos.filter((todo) => todo.id !== id)
+	const deletedTodo = todos[todoIndex]
+	todos.splice(todoIndex, 1)
 	await new Promise((resolve) => setTimeout(resolve, 2_000))
+	return deletedTodo
 }

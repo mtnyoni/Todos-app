@@ -29,8 +29,8 @@ export function DisplayTodoPopover() {
 			<Popover.Content className="mt-1 w-96 overflow-hidden rounded-xl border bg-background shadow-lg">
 				<div>
 					<div className="p-3">
-						<div className="grid w-full grid-cols-2 gap-1">
-							<div className="flex h-20 cursor-pointer flex-col items-center justify-center">
+						<div className="grid w-full grid-cols-2 gap-3">
+							<div className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-lg hover:bg-muted">
 								<RowsIcon className="size-5" /> Cards
 							</div>
 							<div className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-lg border bg-muted">

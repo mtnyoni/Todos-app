@@ -37,7 +37,7 @@ export function TodoList() {
 					<AddTodoDialog />
 				</div>
 			</header>
-			<div className="mx-auto mt-3 max-w-5xl space-y-1 sm:mt-10">
+			<div className="mx-auto mt-2 max-w-5xl space-y-2 sm:mt-10">
 				<div>
 					<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 						<div className="space-x-3">
