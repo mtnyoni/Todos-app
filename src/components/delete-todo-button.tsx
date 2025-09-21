@@ -1,4 +1,4 @@
-import { deleteTodo, todoSchema } from "@/api/routes"
+import { deleteTodo, todoSchema } from "@/api/todos"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2Icon, TrashIcon } from "lucide-react"
 import { useRef, useState } from "react"

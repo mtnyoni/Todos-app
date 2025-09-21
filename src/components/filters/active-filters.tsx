@@ -20,7 +20,6 @@ export function ActiveFilters() {
 				setValues(null)
 			}
 		}
-
 		window.addEventListener("keydown", listener)
 		return () => window.removeEventListener("keydown", listener)
 	}, [setValues])
@@ -29,59 +28,69 @@ export function ActiveFilters() {
 	if (!status && !date) return null
 
 	return (
-		<div className="mt-3 flex h-9 flex-wrap items-center gap-3">
-			{status && (
-				<div className="flex items-center gap-1 rounded-lg border">
-					<div className="flex h-9 items-center gap-1 pl-3">
-						<Loader2Icon className="size-3" />
-						Status
+		<div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+			<div className="flex flex-wrap items-center gap-3">
+				{status && (
+					<div className="flex items-center gap-1 rounded-lg border">
+						<div className="flex h-9 items-center gap-1 pl-3">
+							<Loader2Icon className="size-3" />
+							Status
+						</div>
+						<span className="grid h-9 place-items-center border-l px-2 text-muted-foreground">
+							is
+						</span>
+						<div className="flex h-9 items-center gap-1 border-l px-2 capitalize">
+							<CheckCircle2Icon className="size-3" />
+							{status}
+						</div>
+						<button
+							onClick={() =>
+								setValues((params) => ({
+									...params,
+									status: null,
+								}))
+							}
+							className="flex h-9 cursor-pointer items-center gap-1 rounded-r-[inherit] border-l px-2 capitalize hover:bg-muted"
+						>
+							<XIcon className="size-3" />
+						</button>
 					</div>
-					<span className="grid h-9 place-items-center border-l px-2 text-muted-foreground">
-						is
-					</span>
-					<div className="flex h-9 items-center gap-1 border-l px-2 capitalize">
-						<CheckCircle2Icon className="size-3" />
-						{status}
+				)}
+				{date && (
+					<div className="flex items-center gap-1 rounded-lg border">
+						<div className="flex h-9 items-center gap-1 pl-3">
+							<CalendarIcon className="size-3" />
+							Date
+						</div>
+						<span className="grid h-9 place-items-center border-l px-2 text-muted-foreground">
+							{dateSplits?.at(0)}
+						</span>
+						<div className="flex h-9 items-center gap-1 border-l px-2">
+							<CheckCircle2Icon className="size-3" />
+							{dateSplits?.at(1)}
+						</div>
+						<button
+							onClick={() =>
+								setValues((params) => ({
+									...params,
+									date: null,
+								}))
+							}
+							className="flex h-9 cursor-pointer items-center gap-1 rounded-r-[inherit] border-l px-2 capitalize hover:bg-muted"
+						>
+							<XIcon className="size-3" />
+						</button>
 					</div>
-					<button
-						onClick={() =>
-							setValues((params) => ({ ...params, status: null }))
-						}
-						className="flex h-9 cursor-pointer items-center gap-1 rounded-r-[inherit] border-l px-2 capitalize hover:bg-muted"
-					>
-						<XIcon className="size-3" />
-					</button>
-				</div>
-			)}
-			{date && (
-				<div className="flex items-center gap-1 rounded-lg border">
-					<div className="flex h-9 items-center gap-1 pl-3">
-						<CalendarIcon className="size-3" />
-						Date
-					</div>
-					<span className="grid h-9 place-items-center border-l px-2 text-muted-foreground">
-						{dateSplits?.at(0)}
-					</span>
-					<div className="flex h-9 items-center gap-1 border-l px-2">
-						<CheckCircle2Icon className="size-3" />
-						{dateSplits?.at(1)}
-					</div>
-					<button
-						onClick={() =>
-							setValues((params) => ({ ...params, date: null }))
-						}
-						className="flex h-9 cursor-pointer items-center gap-1 rounded-r-[inherit] border-l px-2 capitalize hover:bg-muted"
-					>
-						<XIcon className="size-3" />
-					</button>
-				</div>
-			)}
+				)}
+			</div>
 			<button
 				onClick={() => setValues(null)}
-				className="ml-auto inline-flex h-9 space-x-2 text-muted-foreground"
+				className="inline-flex h-9 items-center space-x-2 text-muted-foreground"
 			>
-				<span> Clear filters</span>
-				<kbd className="rounded border px-2 py-0.5 text-sm">Esc</kbd>
+				<span>Clear filters</span>
+				<kbd className="inline-flex h-7 items-center rounded border px-2 text-sm">
+					Esc
+				</kbd>
 			</button>
 		</div>
 	)

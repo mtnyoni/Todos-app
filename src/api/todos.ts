@@ -1,42 +1,25 @@
 import { z } from "zod"
 
-export const todoSchema = z.object({
-	id: z.uuid(),
-	task: z.string(),
-	description: z.string(),
-	isCompleted: z.boolean(),
-	createdAt: z.date(),
-})
-
-let todos: z.infer<typeof todoSchema>[] = [
-	{
-		id: "1",
-		task: "Task 1: Buy groceries",
-		description: "Buy milk, eggs, and bread",
-		isCompleted: false,
-		createdAt: new Date(2025, 9, 11),
-	},
-	{
-		id: "2",
-		task: "Finish homework",
-		description: "Finish math homework",
-		isCompleted: true,
-		createdAt: new Date(2025, 8, 11),
-	},
-	{
-		id: "3",
-		task: "Go for a run",
-		description: "Go for a 30-minute run",
-		isCompleted: false,
-		createdAt: new Date(),
-	},
-]
-
 export const uuidSchema = z.uuid()
 export type UUID = z.infer<typeof uuidSchema>
 export const createID = (): UUID => {
 	return crypto.randomUUID()
 }
+
+export const todoSchema = z.object({
+	id: uuidSchema,
+	task: z.string().min(2, { message: "Title must be at least 2 characters" }),
+	description: z
+		.string()
+		.min(5, { message: "Description must be at least 5 characters" })
+		.max(255, {
+			error: "Description must be between 5 and 255 characters",
+		}),
+	isCompleted: z.boolean(),
+	createdAt: z.date(),
+})
+
+let todos: z.infer<typeof todoSchema>[] = []
 
 export const filtersSchema = z.object({
 	status: z.optional(z.enum(["completed", "incomplete"])),
@@ -68,7 +51,8 @@ export async function getTodos(
 		}
 
 		if (filters.date) {
-			const date = new Date(filters.date)
+			const filterDate = filters.date.split(":")
+			const date = new Date(filterDate.at(1) ?? "")
 			return todos.filter(
 				(todo) => todo.createdAt.getTime() === date.getTime()
 			)
@@ -84,13 +68,14 @@ export async function getTodos(
 	return todos.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 }
 
-export const addTodoSchema = todoSchema.omit({
-	id: true,
-	createdAt: true,
-	isCompleted: true,
+export const addTodoSchema = todoSchema.pick({
+	task: true,
+	description: true,
 })
 
 export async function addTodo(newTodoData: z.infer<typeof addTodoSchema>) {
+	await new Promise((resolve) => setTimeout(resolve, 2_000))
+
 	const parsed = addTodoSchema.safeParse(newTodoData)
 	if (!parsed.success) {
 		throw new Error("Task and description are required")
@@ -106,20 +91,21 @@ export async function addTodo(newTodoData: z.infer<typeof addTodoSchema>) {
 	}
 
 	todos = [newTodo, ...todos]
-	await new Promise((resolve) => setTimeout(resolve, 2_000))
 	return todos.find((todo) => todo.id === newTodo.id)!
 }
 
-export const updateTodoSchema = z.object({
-	task: z.string().min(2).max(100),
-	description: z.string().min(2).max(100),
-	isCompleted: z.boolean(),
+export const updateTodoSchema = todoSchema.pick({
+	task: true,
+	description: true,
+	isCompleted: true,
 })
 
 export async function updateTodo(
 	id: string,
 	{ task, description, isCompleted }: z.infer<typeof updateTodoSchema>
 ) {
+	await new Promise((resolve) => setTimeout(resolve, 2_000))
+
 	const todo = todos.find((todo) => todo.id === id)
 	if (!todo) return Promise.reject(new Error("Todo not found"))
 
@@ -138,11 +124,12 @@ export async function updateTodo(
 		return todo
 	})
 
-	await new Promise((resolve) => setTimeout(resolve, 2_000))
 	return todos.find((todo) => todo.id === id)!
 }
 
 export async function deleteTodo(id: string) {
+	await new Promise((resolve) => setTimeout(resolve, 2_000))
+
 	const todoIndex = todos.findIndex((todo) => todo.id === id)
 	if (todoIndex === -1) {
 		throw new Error("Todo not found")
@@ -150,6 +137,26 @@ export async function deleteTodo(id: string) {
 
 	const deletedTodo = todos[todoIndex]
 	todos.splice(todoIndex, 1)
-	await new Promise((resolve) => setTimeout(resolve, 2_000))
 	return deletedTodo
+}
+
+export async function updateTodoStatus(id: string, isCompleted: boolean) {
+	await new Promise((resolve) => setTimeout(resolve, 2_000))
+
+	const todo = todos.find((todo) => todo.id === id)
+	if (!todo) return Promise.reject(new Error("Todo not found"))
+
+	todo.isCompleted = isCompleted
+
+	todos = todos.map((todo) => {
+		if (todo.id === id) {
+			return {
+				...todo,
+				isCompleted,
+			}
+		}
+		return todo
+	})
+
+	return todos.find((todo) => todo.id === id)!
 }

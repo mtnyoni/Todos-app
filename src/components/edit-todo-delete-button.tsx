@@ -1,4 +1,4 @@
-import { deleteTodo, todoSchema } from "@/api/routes"
+import { deleteTodo, todoSchema } from "@/api/todos"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2Icon } from "lucide-react"
 import { toast } from "sonner"
@@ -50,7 +50,7 @@ export function EditTodoDeleteButton({
 		<button
 			type="button"
 			onClick={() => mutation.mutate(id)}
-			className="inline-flex cursor-pointer items-center gap-1 rounded-lg bg-red-200 px-6 py-2 text-sm font-medium text-red-800 hover:bg-red-300 sm:px-10"
+			className="ml-auto inline-flex cursor-pointer items-center gap-1 rounded-lg bg-red-200 px-6 py-2 text-sm font-medium text-red-800 hover:bg-red-300 sm:px-10"
 		>
 			{mutation.isPending && (
 				<Loader2Icon className="size-3.5 animate-spin" />

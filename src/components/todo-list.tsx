@@ -1,4 +1,4 @@
-import { getTodos } from "@/api/routes"
+import { getTodos } from "@/api/todos"
 import { AddTodoDialog } from "@/components/add-todo-dialog"
 import { DisplayTodoPopover } from "@/components/display/display-todo-popover"
 import { ActiveFilters } from "@/components/filters/active-filters"
@@ -8,26 +8,11 @@ import { TodoItem } from "@/components/todo-item"
 import { TodoListSkeleton } from "@/components/todo-list-skeleton"
 import { FilterContextProvider } from "@/contexts/filters-context"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import { parseAsStringLiteral, useQueryState, useQueryStates } from "nuqs"
-import { SORT_OPTIONS } from "./display/sorting-select"
+import { EmptyTodos } from "./empty-todos"
+import { useFilters } from "./filters/use-filters"
 
 export function TodoList() {
-	const [searchTerm] = useQueryState("q")
-	const [status] = useQueryState(
-		"status",
-		parseAsStringLiteral(["completed", "incomplete"])
-	)
-
-	const [date] = useQueryState("date")
-	const [displayMode] = useQueryStates({
-		sort: parseAsStringLiteral(SORT_OPTIONS).withDefault("dateCreated"),
-		mode: parseAsStringLiteral(["cards", "rows"]).withDefault("rows"),
-	})
-
-	const filters = {
-		status: !status ? undefined : status,
-		date: !date ? undefined : date,
-	}
+	const { searchTerm, displayMode, filters } = useFilters()
 
 	const todosQuery = useQuery({
 		queryKey: [
@@ -83,9 +68,13 @@ export function TodoList() {
 					data-mode={displayMode.mode}
 					className="group mt-5 data-[mode=cards]:space-y-2"
 				>
-					{todosQuery.data.map((todo) => (
-						<TodoItem key={todo.id} todo={todo} />
-					))}
+					{todosQuery.data.length > 0 ? (
+						todosQuery.data.map((todo) => (
+							<TodoItem key={todo.id} todo={todo} />
+						))
+					) : (
+						<EmptyTodos />
+					)}
 				</ul>
 			</div>
 		</div>
