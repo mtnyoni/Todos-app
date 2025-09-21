@@ -11,17 +11,17 @@ export const todoSchema = z.object({
 let todos: z.infer<typeof todoSchema>[] = [
 	{
 		id: "1",
-		task: "Buy groceries",
+		task: "Task 1: Buy groceries",
 		description: "Buy milk, eggs, and bread",
 		isCompleted: false,
-		createdAt: new Date(),
+		createdAt: new Date(2025, 9, 11),
 	},
 	{
 		id: "2",
 		task: "Finish homework",
 		description: "Finish math homework",
 		isCompleted: true,
-		createdAt: new Date(),
+		createdAt: new Date(2025, 8, 11),
 	},
 	{
 		id: "3",
@@ -38,15 +38,50 @@ export const createID = (): UUID => {
 	return crypto.randomUUID()
 }
 
-export async function getTodos(search?: string) {
+export const filtersSchema = z.object({
+	status: z.optional(z.enum(["completed", "incomplete"])),
+	date: z.optional(z.string()),
+})
+
+export const displayOrderSchema = z.enum(["dateCreated", "status"])
+
+export async function getTodos(
+	displayOrder: z.infer<typeof displayOrderSchema>,
+	search?: string,
+	filters?: z.infer<typeof filtersSchema>
+) {
 	await new Promise((resolve) => setTimeout(resolve, 2_000))
+
 	if (search?.trim()) {
 		return todos.filter((todo) =>
 			todo.task.toLowerCase().includes(search.toLowerCase())
 		)
 	}
 
-	return todos
+	if (filters) {
+		if (filters.status) {
+			if (filters.status == "completed") {
+				return todos.filter((todo) => todo.isCompleted)
+			} else if (filters.status == "incomplete") {
+				return todos.filter((todo) => !todo.isCompleted)
+			}
+		}
+
+		if (filters.date) {
+			const date = new Date(filters.date)
+			return todos.filter(
+				(todo) => todo.createdAt.getTime() === date.getTime()
+			)
+		}
+	}
+
+	if (displayOrder === "status") {
+		return todos.sort(
+			(a, b) => Number(a.isCompleted) - Number(b.isCompleted)
+		)
+	}
+
+	return todos.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 }
 
 export const addTodoSchema = todoSchema.omit({

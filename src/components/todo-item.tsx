@@ -12,7 +12,11 @@ export function TodoItem({ todo }: { todo: z.infer<typeof todoSchema> }) {
 	return (
 		<AnimatePresence>
 			<EditTodoDialog todo={todo}>
-				<motion.li className="flex items-center gap-8 overflow-hidden border-b px-4 py-4">
+				<motion.li
+					layoutId={todo.id}
+					layout
+					className="flex items-center gap-8 overflow-hidden border-x border-b px-4 py-4 first:rounded-t-lg first:border-t last:rounded-b-lg hover:bg-muted"
+				>
 					<Checkbox.Root
 						data-slot="checkbox"
 						onClick={(e) => e.stopPropagation()}

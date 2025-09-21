@@ -28,6 +28,7 @@ export function EditTodoDialog({
 
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["todos"] })
+			setOpen(false)
 		},
 	})
 
@@ -51,7 +52,6 @@ export function EditTodoDialog({
 						<div className="space-x-2 border-b px-6 py-6">
 							Created on
 							<span>
-								{" "}
 								{formatDate(todo.createdAt, "dd MMM, yyyy")}
 							</span>
 						</div>

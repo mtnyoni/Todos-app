@@ -6,12 +6,12 @@ import { useState } from "react"
 
 export function SearchTodos({ isLoading }: { readonly isLoading: boolean }) {
 	const [search, setSearch] = useState("")
-	const [searchTerm, setSearchTerm] = useQueryState("q", { defaultValue: "" })
+	const [searchTerm, setSearchTerm] = useQueryState("q")
 
 	const debouncedNavigate = debounce(
-		(search: string) => setSearchTerm(search),
+		(search: string | null) => setSearchTerm(search),
 		{
-			wait: 300,
+			wait: 500,
 		}
 	)
 
@@ -43,7 +43,7 @@ export function SearchTodos({ isLoading }: { readonly isLoading: boolean }) {
 				<button
 					className="grid h-10 place-items-center rounded-[inherit] pr-5"
 					onClick={() => {
-						setSearchTerm("")
+						setSearchTerm(null)
 						setSearch("")
 					}}
 				>

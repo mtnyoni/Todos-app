@@ -5,13 +5,26 @@ import {
 	ChevronUpIcon,
 	SortDescIcon,
 } from "lucide-react"
+import { parseAsStringLiteral, useQueryState } from "nuqs"
 import { useState } from "react"
 
+export const SORT_OPTIONS = ["dateCreated", "status"] as const
 export function SortingSelect() {
 	const [open, setOpen] = useState(false)
+	const [sort, setSort] = useQueryState(
+		"sort",
+		parseAsStringLiteral(SORT_OPTIONS).withDefault("dateCreated")
+	)
 
 	return (
-		<Select.Root open={open} onOpenChange={setOpen}>
+		<Select.Root
+			value={sort}
+			open={open}
+			onOpenChange={setOpen}
+			onValueChange={(value) =>
+				setSort(value as (typeof SORT_OPTIONS)[number])
+			}
+		>
 			<Select.Trigger className="inline-flex h-10 w-full cursor-pointer items-center justify-between rounded-lg border border-input px-3 py-1">
 				<Select.Value placeholder="Sort by" />
 				<Select.Icon>
@@ -31,13 +44,13 @@ export function SortingSelect() {
 				>
 					<Select.Viewport>
 						<Select.Item
-							value="Completions"
+							value="status"
 							className="flex h-8 cursor-pointer items-center justify-between rounded px-2 select-none hover:bg-muted"
 						>
 							<Select.ItemText>
 								<div className="flex items-center gap-2">
 									<SortDescIcon className="size-3.5" />
-									Completions
+									Status
 								</div>
 							</Select.ItemText>
 
@@ -47,7 +60,7 @@ export function SortingSelect() {
 						</Select.Item>
 
 						<Select.Item
-							value="DateCreated"
+							value="dateCreated"
 							className="flex h-8 cursor-pointer items-center justify-between rounded px-2 select-none hover:bg-muted"
 						>
 							<Select.ItemText>

@@ -8,50 +8,69 @@ import { TodoItem } from "@/components/todo-item"
 import { TodoListSkeleton } from "@/components/todo-list-skeleton"
 import { FilterContextProvider } from "@/contexts/filters-context"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import { useQueryState } from "nuqs"
+import { parseAsStringLiteral, useQueryState } from "nuqs"
+import { SORT_OPTIONS } from "./display/sorting-select"
 
 export function TodoList() {
-	const [searchTerm] = useQueryState("q", {
-		defaultValue: "",
-	})
+	const [searchTerm] = useQueryState("q")
+	const [status] = useQueryState(
+		"status",
+		parseAsStringLiteral(["completed", "incomplete"])
+	)
 
-	const todos = useQuery({
-		queryKey: ["todos", searchTerm],
-		queryFn: async () => await getTodos(searchTerm),
+	const [date] = useQueryState("date")
+	const [sort] = useQueryState(
+		"sort",
+		parseAsStringLiteral(SORT_OPTIONS).withDefault("dateCreated")
+	)
+
+	const filters = {
+		status: !status ? undefined : status,
+		date: !date ? undefined : date,
+	}
+
+	const todosQuery = useQuery({
+		queryKey: ["todos", searchTerm, filters.status, filters.date, sort],
+		queryFn: async () =>
+			await getTodos(sort, searchTerm ? searchTerm : undefined, filters),
 		placeholderData: keepPreviousData,
 	})
 
-	if (todos.isPending) {
+	if (todosQuery.isPending) {
 		return <TodoListSkeleton />
 	}
 
-	if (todos.isError) {
-		return <div>Error: {todos.error.message}</div>
+	if (todosQuery.isError) {
+		return <div>Error: {todosQuery.error.message}</div>
 	}
 
 	return (
-		<div className="p-4 sm:px-8 md:px-12 lg:p-0">
-			<header className="border-b py-4">
+		<div className="sm:px-8 md:px-12 lg:p-0">
+			<header className="border-b px-4 py-4">
 				<div className="mx-auto flex max-w-5xl items-center justify-between">
 					<h1 className="text-lg font-bold">Todo List</h1>
 					<AddTodoDialog />
 				</div>
 			</header>
-			<div className="mx-auto mt-2 max-w-5xl space-y-2 sm:mt-10">
+			<div className="mx-auto mt-2 max-w-5xl space-y-2 px-4 sm:mt-10">
 				<div>
 					<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 						<div className="space-x-3">
 							<FilterContextProvider>
-								<FilterTodoPopover />
+								<FilterTodoPopover
+									isLoading={todosQuery.isRefetching}
+								/>
 							</FilterContextProvider>
-							<DisplayTodoPopover />
+							<DisplayTodoPopover
+								isLoading={todosQuery.isRefetching}
+							/>
 						</div>
-						<SearchTodos isLoading={todos.isRefetching} />
+						<SearchTodos isLoading={todosQuery.isRefetching} />
 					</div>
 					<ActiveFilters />
 				</div>
-				<ul className="mt-5 border-t">
-					{todos.data.map((todo) => (
+				<ul className="mt-5">
+					{todosQuery.data.map((todo) => (
 						<TodoItem key={todo.id} todo={todo} />
 					))}
 				</ul>

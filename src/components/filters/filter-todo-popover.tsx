@@ -1,20 +1,34 @@
 import { FilterContext } from "@/contexts/filters-context"
-import { AlignCenterIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
-import { useQueryState } from "nuqs"
+import {
+	AlignCenterIcon,
+	CalendarIcon,
+	ChevronDownIcon,
+	ChevronUpIcon,
+	CircleDotDashedIcon,
+	Loader2Icon,
+} from "lucide-react"
+import { parseAsString, useQueryStates } from "nuqs"
 import { Popover } from "radix-ui"
 import { useContext, useEffect, useState } from "react"
 import { DateFilter } from "./date-filter"
+import { StatusFilter } from "./status-filter"
 
-export function FilterTodoPopover() {
+export function FilterTodoPopover({
+	isLoading,
+}: {
+	readonly isLoading: boolean
+}) {
 	const [open, setOpen] = useState(false)
 	const { filter, setFilter } = useContext(FilterContext)
 
-	const [status, setStatus] = useQueryState("status", { defaultValue: "" })
-	const [date] = useQueryState("date")
+	const [{ status, date }] = useQueryStates({
+		status: parseAsString,
+		date: parseAsString,
+	})
 
 	useEffect(() => {
 		if (!open) {
-			setFilter("")
+			setFilter(undefined)
 		}
 	}, [open, setFilter])
 
@@ -22,9 +36,13 @@ export function FilterTodoPopover() {
 		<Popover.Root open={open} onOpenChange={setOpen}>
 			<Popover.Trigger asChild>
 				<button className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg border bg-background px-5 text-foreground">
-					<AlignCenterIcon className="size-3.5" />
+					{(status || date) && isLoading ? (
+						<Loader2Icon className="size-3.5 animate-spin text-primary" />
+					) : (
+						<AlignCenterIcon className="size-3.5" />
+					)}
 					Filter
-					{status === "" && date === "" ? (
+					{!status && !date ? (
 						<>
 							{!open ? (
 								<ChevronDownIcon className="size-3.5" />
@@ -40,51 +58,32 @@ export function FilterTodoPopover() {
 				</button>
 			</Popover.Trigger>
 			<Popover.Portal>
-				<Popover.Content className="mt-1 w-40 rounded-xl border bg-background p-3 shadow-lg">
-					{filter === "" && (
+				<Popover.Content className="mt-1 w-44 rounded-xl border bg-background p-2 shadow-lg">
+					{!filter && (
 						<>
 							<button
 								onClick={() => {
 									setFilter("status")
 								}}
-								className="block w-full cursor-pointer rounded-lg px-2 py-1 text-left hover:bg-muted"
+								className="inline-flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-1 text-left hover:bg-muted"
 							>
+								<CircleDotDashedIcon className="size-4 text-muted-foreground" />
 								Status
 							</button>
 							<button
 								onClick={() => {
 									setFilter("date")
 								}}
-								className="block w-full cursor-pointer rounded-lg px-2 py-1 text-left hover:bg-muted"
+								className="inline-flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-1 text-left hover:bg-muted"
 							>
+								<CalendarIcon className="size-4 text-muted-foreground" />
 								Date
 							</button>
 						</>
 					)}
 
 					{filter === "status" && (
-						<>
-							<button
-								onClick={() => {
-									setStatus("completed")
-									setFilter("")
-									setOpen(false)
-								}}
-								className="block w-full cursor-pointer rounded-lg px-2 py-1 text-left hover:bg-muted"
-							>
-								Completed
-							</button>
-							<button
-								onClick={() => {
-									setStatus("incomplete")
-									setFilter("")
-									setOpen(false)
-								}}
-								className="block w-full cursor-pointer rounded-lg px-2 py-1 text-left hover:bg-muted"
-							>
-								In-complete
-							</button>
-						</>
+						<StatusFilter closePopover={() => setOpen(false)} />
 					)}
 
 					{filter === "date" && (

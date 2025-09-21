@@ -1,21 +1,18 @@
 import React, { createContext } from "react"
 
+type Filter = "status" | "date" | undefined
 type FilterContextType = {
-	filter: string
-	setFilter: React.Dispatch<React.SetStateAction<string>>
+	filter: Filter
+	setFilter: React.Dispatch<React.SetStateAction<Filter>>
 }
 
-export const FilterContext = createContext<FilterContextType>({
-	filter: "",
+const FilterContext = createContext<FilterContextType>({
+	filter: undefined,
 	setFilter: () => {},
 })
 
-export const FilterContextProvider = ({
-	children,
-}: {
-	children: React.ReactNode
-}) => {
-	const [filter, setFilter] = React.useState<string>("")
+const FilterContextProvider = ({ children }: { children: React.ReactNode }) => {
+	const [filter, setFilter] = React.useState<Filter>(undefined)
 
 	return (
 		<FilterContext.Provider value={{ filter, setFilter }}>
@@ -23,3 +20,5 @@ export const FilterContextProvider = ({
 		</FilterContext.Provider>
 	)
 }
+
+export { FilterContext, FilterContextProvider }

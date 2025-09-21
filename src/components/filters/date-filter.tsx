@@ -9,7 +9,7 @@ export function DateFilter({
 }) {
 	const { setFilter } = useContext(FilterContext)
 	const [period, setPeriod] = useState<">" | "<" | "=" | "">("")
-	const [date, setDate] = useQueryState("date", { defaultValue: "" })
+	const [date, setDate] = useQueryState("date")
 
 	return (
 		<div className="space-y-2">
@@ -17,32 +17,32 @@ export function DateFilter({
 				<button
 					data-active={period == ">"}
 					onClick={() => setPeriod(">")}
-					className="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border px-2 py-1 text-left hover:bg-muted data-[active='true']:ring data-[active='true']:ring-primary"
+					className="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border px-2 py-1 text-left hover:bg-muted data-[active=true]:ring data-[active=true]:ring-primary"
 				>
 					&gt;
 				</button>
 				<button
 					data-active={period == "="}
 					onClick={() => setPeriod("=")}
-					className="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border px-2 py-1 text-left hover:bg-muted data-[active='true']:ring data-[active='true']:ring-primary"
+					className="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border px-2 py-1 text-left hover:bg-muted data-[active=true]:ring data-[active=true]:ring-primary"
 				>
 					=
 				</button>
 				<button
 					data-active={period == "<"}
 					onClick={() => setPeriod("<")}
-					className="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border px-2 py-1 text-left hover:bg-muted data-[active='true']:ring data-[active='true']:ring-primary"
+					className="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border px-2 py-1 text-left hover:bg-muted data-[active=true]:ring data-[active=true]:ring-primary"
 				>
 					&lt;
 				</button>
 			</div>
 			<input
 				type="date"
-				value={date}
+				value={date || new Date().toString()}
 				onChange={(e) => {
 					if (period) {
-						setDate(`${period};${e.target.value}`)
-						setFilter("")
+						setDate(`${period}:${e.target.value}`)
+						setFilter(undefined)
 						closePopover()
 					} else {
 						setDate(e.target.value)
