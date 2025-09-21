@@ -1,3 +1,5 @@
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { cn } from "@/lib/utils"
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { formatDate } from "date-fns"
@@ -16,6 +18,7 @@ export function EditTodoDialog({
 	readonly todo: z.infer<typeof todoSchema>
 	readonly children: React.ReactNode
 }) {
+	const isMobile = useMediaQuery("(max-width: 40rem)")
 	const [open, setOpen] = useState(false)
 	const queryClient = useQueryClient()
 	const mutation = useMutation({
@@ -42,7 +45,13 @@ export function EditTodoDialog({
 			<Dialog.Trigger asChild>{children}</Dialog.Trigger>
 			<Dialog.Portal>
 				<Dialog.Overlay className="data-[state=open]:animate-overlayShow fixed inset-0 bg-black/50" />
-				<Dialog.Content className="fixed top-1/2 right-1 h-[calc(100vh-0.5rem)] w-[90vw] max-w-[500px] -translate-y-1/2 rounded-3xl border bg-background shadow-lg focus:outline-none">
+				<Dialog.Content
+					className={cn(
+						"fixed top-1/2 right-1 h-[calc(100vh-0.5rem)] w-[90vw] max-w-[500px] -translate-y-1/2 rounded-3xl border bg-background shadow-lg focus:outline-none",
+						isMobile &&
+							"top-auto bottom-1 h-[90dvh] w-[calc(100dvw-0.5rem)] max-w-[calc(100dvw-0.5rem)] -translate-0"
+					)}
+				>
 					<form
 						onSubmit={(e) => {
 							e.preventDefault()
@@ -149,13 +158,13 @@ export function EditTodoDialog({
 									<button
 										type="reset"
 										onClick={() => form.reset()}
-										className="inline-flex cursor-pointer items-center rounded-lg bg-muted px-10 py-2 text-sm font-medium text-muted-foreground hover:bg-gray-200"
+										className="inline-flex cursor-pointer items-center rounded-lg bg-muted px-6 py-2 text-sm font-medium text-muted-foreground hover:bg-gray-200 sm:px-10"
 									>
 										Reset
 									</button>
 									<button
 										type="submit"
-										className="inline-flex items-center gap-2 rounded-lg bg-primary px-10 py-2 text-sm font-medium text-white hover:bg-primary/90"
+										className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary/90 sm:px-10"
 									>
 										{isSubmitting && (
 											<LoaderIcon className="size-3.5 animate-spin" />

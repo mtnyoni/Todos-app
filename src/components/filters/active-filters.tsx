@@ -68,7 +68,7 @@ export function ActiveFilters() {
 					</div>
 					<button
 						onClick={() =>
-							setValues((params) => ({ ...params, status: null }))
+							setValues((params) => ({ ...params, date: null }))
 						}
 						className="flex h-9 cursor-pointer items-center gap-1 rounded-r-[inherit] border-l px-2 capitalize hover:bg-muted"
 					>
@@ -78,7 +78,7 @@ export function ActiveFilters() {
 			)}
 			<button
 				onClick={() => setValues(null)}
-				className="ml-auto space-x-2 text-muted-foreground"
+				className="ml-auto inline-flex h-9 space-x-2 text-muted-foreground"
 			>
 				<span> Clear filters</span>
 				<kbd className="rounded border px-2 py-0.5 text-sm">Esc</kbd>

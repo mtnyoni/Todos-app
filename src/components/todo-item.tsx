@@ -15,7 +15,7 @@ export function TodoItem({ todo }: { todo: z.infer<typeof todoSchema> }) {
 				<motion.li
 					layoutId={todo.id}
 					layout
-					className="flex items-center gap-8 overflow-hidden border-x border-b px-4 py-4 group-data-[mode=cards]:rounded-lg group-data-[mode=cards]:border group-data-[mode=cards]:shadow-sm first:rounded-t-lg first:border-t last:rounded-b-lg hover:bg-muted"
+					className="flex flex-col overflow-hidden border-x border-b px-4 py-4 group-data-[mode=cards]:rounded-lg group-data-[mode=cards]:border group-data-[mode=cards]:shadow-sm first:rounded-t-lg first:border-t last:rounded-b-lg hover:bg-muted sm:flex-row sm:items-center sm:gap-8"
 				>
 					<Checkbox.Root
 						data-slot="checkbox"
@@ -56,7 +56,7 @@ export function TodoItem({ todo }: { todo: z.infer<typeof todoSchema> }) {
 						</Checkbox.Indicator>
 					</Checkbox.Root>
 					<div>
-						<div className="font-medium">{todo.task}</div>
+						<div className="text-sm font-medium">{todo.task}</div>
 						<p className="text-sm text-muted-foreground">
 							{todo.description}
 						</p>

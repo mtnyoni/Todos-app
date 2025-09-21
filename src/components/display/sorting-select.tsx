@@ -40,7 +40,7 @@ export function SortingSelect() {
 				<Select.Content
 					position="popper"
 					sideOffset={4}
-					className="rounded-xl border bg-background p-3 sm:w-52"
+					className="z-20 rounded-xl border bg-background p-3 shadow-lg sm:w-52"
 				>
 					<Select.Viewport>
 						<Select.Item

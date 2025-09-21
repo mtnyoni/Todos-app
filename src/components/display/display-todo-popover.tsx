@@ -1,3 +1,5 @@
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { cn } from "@/lib/utils"
 import {
 	ArrowUpDownIcon,
 	ChevronDownIcon,
@@ -16,6 +18,7 @@ export function DisplayTodoPopover({
 }: {
 	readonly isLoading: boolean
 }) {
+	const isMobile = useMediaQuery("(max-width: 40rem)")
 	const [sort] = useQueryState("sort")
 	const [open, setOpen] = useState(false)
 
@@ -39,7 +42,12 @@ export function DisplayTodoPopover({
 					)}
 				</button>
 			</Popover.Trigger>
-			<Popover.Content className="mt-1 w-96 overflow-hidden rounded-xl border bg-background shadow-lg">
+			<Popover.Content
+				className={cn(
+					"z-10 mt-1 w-96 overflow-hidden rounded-xl border bg-background shadow-lg",
+					isMobile && "max-w-screen"
+				)}
+			>
 				<div>
 					<CardsOrRowsDisplay />
 					<div className="grid grid-cols-2 place-items-center border-t px-3 py-4">

@@ -1,4 +1,6 @@
 import { addTodo, addTodoSchema } from "@/api/routes"
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { cn } from "@/lib/utils"
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { LoaderIcon, PlusIcon } from "lucide-react"
@@ -8,6 +10,7 @@ import type z from "zod"
 
 export function AddTodoDialog() {
 	const queryClient = useQueryClient()
+	const isMobile = useMediaQuery("(max-width: 40rem)")
 
 	const addTodoMutation = useMutation({
 		mutationFn: async (data: z.infer<typeof addTodoSchema>) =>
@@ -42,7 +45,14 @@ export function AddTodoDialog() {
 			</Dialog.Trigger>
 			<Dialog.Portal>
 				<Dialog.Overlay className="data-[state=open]:animate-overlayShow fixed inset-0 bg-black/50" />
-				<Dialog.Content className="fixed top-1/2 right-1 h-[calc(100vh-0.5rem)] w-[90vw] max-w-[500px] -translate-y-1/2 rounded-3xl border bg-background shadow-lg focus:outline-none">
+				<Dialog.Content
+					data-mobile={isMobile}
+					className={cn(
+						"fixed top-1/2 right-1 h-[calc(100vh-0.5rem)] w-[90vw] max-w-[500px] -translate-y-1/2 rounded-3xl border bg-background shadow-lg focus:outline-none",
+						isMobile &&
+							"top-auto bottom-1 h-2/3 w-[calc(100dvw-0.5rem)] max-w-[calc(100dvw-0.5rem)] -translate-0"
+					)}
+				>
 					<form
 						onSubmit={(e) => {
 							e.preventDefault()
