@@ -8,7 +8,7 @@ import { TodoItem } from "@/components/todo-item"
 import { TodoListSkeleton } from "@/components/todo-list-skeleton"
 import { FilterContextProvider } from "@/contexts/filters-context"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import { parseAsStringLiteral, useQueryState } from "nuqs"
+import { parseAsStringLiteral, useQueryState, useQueryStates } from "nuqs"
 import { SORT_OPTIONS } from "./display/sorting-select"
 
 export function TodoList() {
@@ -19,10 +19,10 @@ export function TodoList() {
 	)
 
 	const [date] = useQueryState("date")
-	const [sort] = useQueryState(
-		"sort",
-		parseAsStringLiteral(SORT_OPTIONS).withDefault("dateCreated")
-	)
+	const [displayMode] = useQueryStates({
+		sort: parseAsStringLiteral(SORT_OPTIONS).withDefault("dateCreated"),
+		mode: parseAsStringLiteral(["cards", "rows"]).withDefault("rows"),
+	})
 
 	const filters = {
 		status: !status ? undefined : status,
@@ -30,9 +30,19 @@ export function TodoList() {
 	}
 
 	const todosQuery = useQuery({
-		queryKey: ["todos", searchTerm, filters.status, filters.date, sort],
+		queryKey: [
+			"todos",
+			searchTerm,
+			filters.status,
+			filters.date,
+			displayMode.sort,
+		],
 		queryFn: async () =>
-			await getTodos(sort, searchTerm ? searchTerm : undefined, filters),
+			await getTodos(
+				displayMode.sort,
+				searchTerm ? searchTerm : undefined,
+				filters
+			),
 		placeholderData: keepPreviousData,
 	})
 
@@ -69,7 +79,10 @@ export function TodoList() {
 					</div>
 					<ActiveFilters />
 				</div>
-				<ul className="mt-5">
+				<ul
+					data-mode={displayMode.mode}
+					className="group mt-5 data-[mode=cards]:space-y-2"
+				>
 					{todosQuery.data.map((todo) => (
 						<TodoItem key={todo.id} todo={todo} />
 					))}
