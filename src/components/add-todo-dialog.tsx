@@ -1,17 +1,20 @@
 import { addTodo, addTodoSchema } from "@/api/todos"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
+import { todosQuery } from "@/queries/todos"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2Icon, PlusIcon } from "lucide-react"
 import { motion } from "motion/react"
 import { Dialog } from "radix-ui"
 import { toast } from "sonner"
 import type z from "zod"
+import { useFilters } from "./filters/use-filters"
 import { useAppForm } from "./forms/context"
 
 export function AddTodoDialog() {
 	const queryClient = useQueryClient()
 	const isMobile = useMediaQuery("(max-width: 40rem)")
+	const { displayMode, searchTerm, filters } = useFilters()
 
 	const dialogAnimations = {
 		initial: {
@@ -33,7 +36,9 @@ export function AddTodoDialog() {
 			}),
 
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["todos"] })
+			queryClient.invalidateQueries({
+				queryKey: todosQuery.all(displayMode.sort, searchTerm, filters),
+			})
 			form.reset()
 			toast.success("new todo added")
 		},
@@ -54,8 +59,8 @@ export function AddTodoDialog() {
 	return (
 		<Dialog.Root>
 			<Dialog.Trigger asChild>
-				<button className="inline-flex h-10 items-center gap-1 rounded-lg bg-primary px-6 text-primary-foreground">
-					<PlusIcon className="size-3.5" />
+				<button className="inline-flex h-9 items-center gap-1 rounded-lg bg-primary px-4 text-primary-foreground">
+					<PlusIcon className="size-4" />
 					New
 				</button>
 			</Dialog.Trigger>
@@ -102,13 +107,13 @@ export function AddTodoDialog() {
 										<button
 											type="reset"
 											onClick={() => form.reset()}
-											className="inline-flex cursor-pointer items-center rounded-lg bg-muted px-10 py-2 text-sm font-medium text-muted-foreground hover:bg-gray-200"
+											className="inline-flex cursor-pointer items-center rounded-lg bg-muted px-6 py-2 text-sm font-medium text-muted-foreground hover:bg-gray-200 sm:px-10"
 										>
 											Reset
 										</button>
 										<button
 											type="submit"
-											className="inline-flex items-center gap-2 rounded-lg bg-primary px-10 py-2 text-sm font-medium text-white hover:bg-primary/90"
+											className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary/90 sm:px-10"
 										>
 											{isSubmitting && (
 												<Loader2Icon className="size-3.5 animate-spin" />

@@ -1,8 +1,10 @@
 import { deleteTodo, todoSchema } from "@/api/todos"
+import { todosQuery } from "@/queries/todos"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2Icon } from "lucide-react"
 import { toast } from "sonner"
 import type z from "zod"
+import { useFilters } from "./filters/use-filters"
 
 export function EditTodoDeleteButton({
 	id,
@@ -11,18 +13,21 @@ export function EditTodoDeleteButton({
 	readonly id: string
 	readonly cleanUpForm: () => void
 }) {
+	const { displayMode, searchTerm, filters } = useFilters()
 	const queryClient = useQueryClient()
 
 	const mutation = useMutation({
 		mutationFn: deleteTodo,
 		onMutate: async (id) => {
-			await queryClient.cancelQueries({ queryKey: ["todos"] })
+			await queryClient.cancelQueries({
+				queryKey: todosQuery.all(displayMode.sort, searchTerm, filters),
+			})
 			const previousTodos = queryClient.getQueryData<
 				z.infer<typeof todoSchema>[]
-			>(["todos"])
+			>(todosQuery.all(displayMode.sort, searchTerm, filters))
 
 			queryClient.setQueryData<z.infer<typeof todoSchema>[]>(
-				["todos"],
+				todosQuery.all(displayMode.sort, searchTerm, filters),
 				(oldTodos) => {
 					if (!oldTodos) return []
 					return oldTodos.filter((todo) => todo.id !== id)
@@ -33,7 +38,10 @@ export function EditTodoDeleteButton({
 		},
 		onError: (error, _, context) => {
 			if (context?.previousTodos) {
-				queryClient.setQueryData(["todos"], context.previousTodos)
+				queryClient.setQueryData(
+					todosQuery.all(displayMode.sort, searchTerm, filters),
+					context.previousTodos
+				)
 			}
 			toast.error(error.message || "Failed to delete todo")
 		},
@@ -42,7 +50,9 @@ export function EditTodoDeleteButton({
 			cleanUpForm()
 		},
 		onSettled: () => {
-			queryClient.invalidateQueries({ queryKey: ["todos"] })
+			queryClient.invalidateQueries({
+				queryKey: todosQuery.all(displayMode.sort, searchTerm, filters),
+			})
 		},
 	})
 

@@ -40,7 +40,7 @@ export function DateFilter({
 				type="date"
 				value={date || new Date().toString()}
 				onChange={(e) => {
-					if (period) {
+					if (period && period !== "") {
 						setDate(`${period}:${e.target.value}`)
 						setFilter(undefined)
 						closePopover()

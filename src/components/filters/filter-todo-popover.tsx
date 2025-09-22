@@ -20,7 +20,7 @@ export function FilterTodoPopover({
 }: {
 	readonly isLoading: boolean
 }) {
-	const variants = {
+	const containerVariants = {
 		initial: {
 			height: 0,
 			opacity: 0,
@@ -28,12 +28,33 @@ export function FilterTodoPopover({
 		animate: {
 			height: "auto",
 			opacity: 1,
+			transition: {
+				duration: 0.3,
+				// ease: "easeOut",
+
+				staggerChildren: 0.1,
+				delayChildren: 0.1,
+			},
+		},
+	}
+
+	const itemVariants = {
+		initial: {
+			opacity: 0,
+			y: -10,
+		},
+		animate: {
+			opacity: 1,
+			y: 0,
+			transition: {
+				duration: 0.2,
+				// ease: "easeOut",
+			},
 		},
 	}
 
 	const [open, setOpen] = useState(false)
 	const { filter, setFilter } = useContext(FilterContext)
-
 	const [{ status, date }] = useQueryStates({
 		status: parseAsString,
 		date: parseAsString,
@@ -80,12 +101,13 @@ export function FilterTodoPopover({
 					<motion.div
 						initial="initial"
 						animate="animate"
-						variants={variants}
-						className="mt-1 w-44 rounded-xl border bg-background p-2 shadow-lg"
+						variants={containerVariants}
+						className="mt-1 w-44 overflow-hidden rounded-xl border bg-background p-2 shadow-lg"
 					>
 						{!filter && (
 							<>
-								<button
+								<motion.button
+									variants={itemVariants}
 									onClick={() => {
 										setFilter("status")
 									}}
@@ -93,8 +115,9 @@ export function FilterTodoPopover({
 								>
 									<CircleDotDashedIcon className="size-4 text-muted-foreground" />
 									Status
-								</button>
-								<button
+								</motion.button>
+								<motion.button
+									variants={itemVariants}
 									onClick={() => {
 										setFilter("date")
 									}}
@@ -102,16 +125,30 @@ export function FilterTodoPopover({
 								>
 									<CalendarIcon className="size-4 text-muted-foreground" />
 									Date
-								</button>
+								</motion.button>
 							</>
 						)}
-
 						{filter === "status" && (
-							<StatusFilter closePopover={() => setOpen(false)} />
+							<motion.div
+								variants={itemVariants}
+								initial="initial"
+								animate="animate"
+							>
+								<StatusFilter
+									closePopover={() => setOpen(false)}
+								/>
+							</motion.div>
 						)}
-
 						{filter === "date" && (
-							<DateFilter closePopover={() => setOpen(false)} />
+							<motion.div
+								variants={itemVariants}
+								initial="initial"
+								animate="animate"
+							>
+								<DateFilter
+									closePopover={() => setOpen(false)}
+								/>
+							</motion.div>
 						)}
 					</motion.div>
 				</Popover.Content>

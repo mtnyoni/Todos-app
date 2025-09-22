@@ -1,33 +1,41 @@
 import { updateTodoStatus, type todoSchema } from "@/api/todos"
-import { QueryClient, useMutation } from "@tanstack/react-query"
+import { todosQuery } from "@/queries/todos"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion } from "motion/react"
 import { Checkbox } from "radix-ui"
 import { toast } from "sonner"
 import type z from "zod"
+import { useFilters } from "./filters/use-filters"
 
 export function IsCompletedCheckbox({
 	todo,
 }: {
 	readonly todo: z.infer<typeof todoSchema>
 }) {
-	const queryClient = new QueryClient()
+	const { displayMode, searchTerm, filters } = useFilters()
+	const queryClient = useQueryClient()
 	const updateMutation = useMutation({
-		mutationFn: async (isCompleted: boolean) => {
-			await updateTodoStatus(todo.id, isCompleted)
-		},
-
-		onMutate: async (isCompleted) => {
-			await queryClient.cancelQueries({ queryKey: ["todos"] })
+		mutationFn: async ({
+			todoId,
+			isCompleted,
+		}: {
+			todoId: string
+			isCompleted: boolean
+		}) => await updateTodoStatus(todoId, isCompleted),
+		onMutate: async ({ todoId, isCompleted }) => {
+			await queryClient.cancelQueries({
+				queryKey: todosQuery.all(displayMode.sort, searchTerm, filters),
+			})
 			const previousTodos = queryClient.getQueryData<
 				z.infer<typeof todoSchema>[]
-			>(["todos"])
+			>(todosQuery.all(displayMode.sort, searchTerm, filters))
 
 			queryClient.setQueryData<z.infer<typeof todoSchema>[]>(
-				["todos"],
+				todosQuery.all(displayMode.sort, searchTerm, filters),
 				(oldTodos) => {
 					if (!oldTodos) return []
 					return oldTodos.map((todo) => {
-						if (todo.id === todo.id) {
+						if (todo.id === todoId) {
 							return { ...todo, isCompleted: isCompleted }
 						}
 
@@ -41,13 +49,18 @@ export function IsCompletedCheckbox({
 
 		onError: (error, _, context) => {
 			if (context?.previousTodos) {
-				queryClient.setQueryData(["todos"], context.previousTodos)
+				queryClient.setQueryData(
+					todosQuery.all(displayMode.sort, searchTerm, filters),
+					context.previousTodos
+				)
 			}
 			toast.error(error.message)
 		},
 
 		onSettled: () => {
-			queryClient.invalidateQueries({ queryKey: ["todos"] })
+			queryClient.invalidateQueries({
+				queryKey: todosQuery.all(displayMode.sort, searchTerm, filters),
+			})
 		},
 	})
 
@@ -56,7 +69,12 @@ export function IsCompletedCheckbox({
 			data-slot="checkbox"
 			onClick={(e) => e.stopPropagation()}
 			checked={todo.isCompleted}
-			onCheckedChange={(checked) => updateMutation.mutateAsync(!!checked)}
+			onCheckedChange={(checked) => {
+				updateMutation.mutate({
+					todoId: todo.id,
+					isCompleted: checked === true ? true : false,
+				})
+			}}
 			className="grid size-[1.3rem] cursor-pointer place-items-center rounded-lg border bg-background data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-white"
 		>
 			<Checkbox.Indicator>

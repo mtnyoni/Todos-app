@@ -19,5 +19,9 @@ export function useFilters() {
 		date: !date ? undefined : date,
 	}
 
-	return { searchTerm, displayMode, filters }
+	return {
+		searchTerm: searchTerm ? searchTerm : undefined,
+		displayMode,
+		filters,
+	}
 }

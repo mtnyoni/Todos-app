@@ -1,13 +1,16 @@
 import { deleteTodo, todoSchema } from "@/api/todos"
+import { todosQuery } from "@/queries/todos"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2Icon, TrashIcon } from "lucide-react"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
 import type z from "zod"
+import { useFilters } from "./filters/use-filters"
 
 const HOLDING_THRESHOLD = 600
 
 export function DeleteTodoButton({ todoId }: { todoId: string }) {
+	const { displayMode, searchTerm, filters } = useFilters()
 	const [progress, setProgress] = useState(0)
 
 	const requestRef = useRef<number | null>(null)
@@ -21,10 +24,10 @@ export function DeleteTodoButton({ todoId }: { todoId: string }) {
 			await queryClient.cancelQueries({ queryKey: ["todos"] })
 			const previousTodos = queryClient.getQueryData<
 				z.infer<typeof todoSchema>[]
-			>(["todos"])
+			>(todosQuery.all(displayMode.sort, searchTerm, filters))
 
 			queryClient.setQueryData<z.infer<typeof todoSchema>[]>(
-				["todos"],
+				todosQuery.all(displayMode.sort, searchTerm, filters),
 				(oldTodos) => {
 					if (!oldTodos) return []
 					return oldTodos.filter((todo) => todo.id !== id)
@@ -35,7 +38,10 @@ export function DeleteTodoButton({ todoId }: { todoId: string }) {
 		},
 		onError: (error, _, context) => {
 			if (context?.previousTodos) {
-				queryClient.setQueryData(["todos"], context.previousTodos)
+				queryClient.setQueryData(
+					todosQuery.all(displayMode.sort, searchTerm, filters),
+					context.previousTodos
+				)
 			}
 			toast.error(error.message || "Failed to delete todo")
 		},
@@ -43,7 +49,9 @@ export function DeleteTodoButton({ todoId }: { todoId: string }) {
 			toast.success("Todo deleted")
 		},
 		onSettled: () => {
-			queryClient.invalidateQueries({ queryKey: ["todos"] })
+			queryClient.invalidateQueries({
+				queryKey: todosQuery.all(displayMode.sort, searchTerm, filters),
+			})
 		},
 	})
 
@@ -88,7 +96,7 @@ export function DeleteTodoButton({ todoId }: { todoId: string }) {
 			onMouseLeave={handleMouseUp}
 			onClick={(e) => e.stopPropagation()}
 			disabled={mutation.isPending}
-			className="relative isolate ml-auto inline-flex h-7 cursor-pointer items-center gap-1 overflow-hidden rounded-xl bg-red-100 px-3 py-1 text-sm font-medium text-red-400 disabled:opacity-50"
+			className="relative isolate ml-auto inline-flex h-7 cursor-pointer items-center gap-1 overflow-hidden rounded-lg bg-red-100 px-3 py-1 text-sm font-medium text-red-400 disabled:opacity-50"
 		>
 			<div
 				className="absolute inset-0 -z-1 rounded-[inherit] bg-red-300"
@@ -100,7 +108,7 @@ export function DeleteTodoButton({ todoId }: { todoId: string }) {
 				<Loader2Icon className="size-3 animate-spin" />
 			) : (
 				<TrashIcon
-					className={`ml-auto size-4 transition-colors ${
+					className={`ml-auto size-3.5 transition-colors ${
 						mutation.isPending
 							? "cursor-not-allowed"
 							: "hover:text-destructive cursor-pointer"

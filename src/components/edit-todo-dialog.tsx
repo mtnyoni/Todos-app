@@ -1,5 +1,6 @@
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
+import { todosQuery } from "@/queries/todos"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { formatDate } from "date-fns"
 import { Loader2Icon } from "lucide-react"
@@ -9,6 +10,7 @@ import { useState } from "react"
 import type z from "zod"
 import { todoSchema, updateTodo, updateTodoSchema } from "../api/todos"
 import { EditTodoDeleteButton } from "./edit-todo-delete-button"
+import { useFilters } from "./filters/use-filters"
 import { useAppForm } from "./forms/context"
 
 export function EditTodoDialog({
@@ -18,6 +20,7 @@ export function EditTodoDialog({
 	readonly todo: z.infer<typeof todoSchema>
 	readonly children: React.ReactNode
 }) {
+	const { displayMode, searchTerm, filters } = useFilters()
 	const isMobile = useMediaQuery("(max-width: 40rem)")
 	const dialogAnimations = {
 		initial: {
@@ -42,7 +45,9 @@ export function EditTodoDialog({
 			}),
 
 		onSuccess: async () => {
-			await queryClient.invalidateQueries({ queryKey: ["todos"] })
+			await queryClient.invalidateQueries({
+				queryKey: todosQuery.all(displayMode.sort, searchTerm, filters),
+			})
 			setOpen(false)
 		},
 	})
