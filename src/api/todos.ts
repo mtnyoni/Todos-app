@@ -1,3 +1,11 @@
+import { dateFilterSchema } from "@/components/filters/date-filter/date-filter-codec"
+import {
+	endOfDay,
+	isAfter,
+	isBefore,
+	isWithinInterval,
+	startOfDay,
+} from "date-fns"
 import { z } from "zod"
 
 export const uuidSchema = z.uuid()
@@ -23,10 +31,34 @@ let todos: z.infer<typeof todoSchema>[] = []
 
 export const filtersSchema = z.object({
 	status: z.optional(z.enum(["completed", "incomplete"])),
-	date: z.optional(z.string()),
+	date: z.optional(dateFilterSchema),
 })
 
 export const displayOrderSchema = z.enum(["dateCreated", "status"])
+
+function applyDateFilter(
+	filter: z.infer<typeof dateFilterSchema>,
+	todos: z.infer<typeof todoSchema>[]
+) {
+	switch (filter.period) {
+		case "=":
+			return todos.filter((todo) =>
+				isWithinInterval(todo.createdAt, {
+					start: startOfDay(filter.date),
+					end: endOfDay(filter.date),
+				})
+			)
+
+		case ">":
+			return todos.filter((todo) => isAfter(todo.createdAt, filter.date))
+
+		case "<":
+			return todos.filter((todo) => isBefore(todo.createdAt, filter.date))
+
+		default:
+			return todos
+	}
+}
 
 export async function getTodos(
 	displayOrder: z.infer<typeof displayOrderSchema>,
@@ -51,11 +83,7 @@ export async function getTodos(
 		}
 
 		if (filters.date) {
-			const filterDate = filters.date.split(":")
-			const date = new Date(filterDate.at(1) ?? "")
-			return todos.filter(
-				(todo) => todo.createdAt.getTime() === date.getTime()
-			)
+			return applyDateFilter(filters.date, todos)
 		}
 	}
 

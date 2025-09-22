@@ -1,3 +1,4 @@
+import { formatDate } from "date-fns"
 import {
 	CalendarIcon,
 	CheckCircle2Icon,
@@ -6,11 +7,12 @@ import {
 } from "lucide-react"
 import { parseAsString, useQueryStates } from "nuqs"
 import { useEffect } from "react"
+import { dateFilterParser } from "./date-filter/date-filter-codec"
 
 export function ActiveFilters() {
 	const [{ status, date }, setValues] = useQueryStates({
 		status: parseAsString,
-		date: parseAsString,
+		date: dateFilterParser,
 	})
 
 	useEffect(() => {
@@ -24,7 +26,6 @@ export function ActiveFilters() {
 		return () => window.removeEventListener("keydown", listener)
 	}, [setValues])
 
-	const dateSplits = date?.split(":")
 	if (!status && !date) return null
 
 	return (
@@ -63,11 +64,11 @@ export function ActiveFilters() {
 							Date
 						</div>
 						<span className="grid h-9 place-items-center border-l px-2 text-muted-foreground">
-							{dateSplits?.at(0)}
+							{date.period}
 						</span>
 						<div className="flex h-9 items-center gap-1 border-l px-2">
 							<CheckCircle2Icon className="size-3" />
-							{dateSplits?.at(1)}
+							{formatDate(date.date, "dd-MM-yyyy")}
 						</div>
 						<button
 							onClick={() =>
